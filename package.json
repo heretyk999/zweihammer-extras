@@ -1,0 +1,16 @@
+{
+  "name": "zweihander-extras",
+  "version": "0.0.1",
+  "description": "Extra functionality for Zweihander system",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "esm": "^3.2.25",
+    "gulp": "^4.0.2",
+    "gulp-sass": "^5.1.0",
+    "sass": "^1.65.1"
+  }
+}

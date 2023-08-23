@@ -1,0 +1,23 @@
+{
+    "zweihammer": {
+        "profile": {
+            "abbrev": {
+                "combat": "C",
+                "brawn": "B",
+                "agility": "A",
+                "perception": "P",
+                "intelligence": "I",
+                "willpower": "W",
+                "fellowship": "F",
+                
+                "initiative": "Int",
+                "movement": "Mov",
+                "dth": "DTh",
+                "pth": "PTh",
+                "parry": "Par",
+                "dodge": "Dod",
+                "riskfactor": "RFa"
+            }
+        }
+    }
+}

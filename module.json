@@ -1,0 +1,41 @@
+{
+  "id": "zweihammer-extras",
+  "title": "Zweihänder extras",
+  "description": "Extra functionality for Zweihander system with Warhammer focus",
+  "authors": [
+    {
+      "name": "Bad W0lf"
+    }
+    ],
+  "version": "0.0.1",
+  "compatibility": {
+    "minimum": "11",
+    "verified": "11",
+    "maximum": "11"
+  },
+  "relationships": {
+    "systems": [{
+      "id": "zweihander",
+      "type": "system"
+    }]
+  },
+  "esmodules": [
+    "module/main.mjs"
+  ],
+  "styles": [
+    "zweihammer-extras.css"
+  ],
+  "languages": [
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "lang/en.json"
+    }
+  ],
+  "flags": {
+    "hotReload": {
+      "extensions": ["css", "hbs", "json"],
+      "paths": ["zweihammer-extras.css", "module/templates", "lang"]
+    }
+  }
+}

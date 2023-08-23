@@ -1,0 +1,64 @@
+#quick-profile {
+    position: relative;
+    width: 0;
+    transition: width .5s;
+    --quick-profile-width: 350px;
+
+    &.is-open {
+        width: var(--quick-profile-width);
+    }
+
+    &.always-on {
+        transition: width 0s;
+    }
+
+    #profile-container {
+        position: absolute;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        width: var(--quick-profile-width);
+        background-color: rgba(0, 0, 0, 0.7);
+        color: white;
+        z-index: 1;
+        padding: 10px;
+        overflow: auto;
+        transition: bottom 0.3s;
+    }
+
+    .profile-actor {
+        &:not(:last-child) {
+            border-bottom: 2px solid var(--color-underline-header);
+            margin-bottom: 10px;
+        }
+        table.profile-attributes {
+            font-size: 8pt;
+            border-color: var(--color-underline-header);
+            tr {
+                background-color: inherit;
+                text-align: center;
+                vertical-align: top;
+            }
+            th {
+                background-color: rgba(255, 255, 255, 0.2);
+            }
+        }
+        h1 {
+            border-bottom: none;
+            font-size: 1.5em;
+        }
+        h2 {
+            // border-top: 1px solid var(--color-underline-header);
+            border-bottom: none;
+            font-size: 1.2em;
+        }
+        .profile-skills {
+            font-style:italic;
+            padding-bottom: 5px;
+        }
+        .profile-section:not(:last-child) {
+            border-bottom: 1px solid var(--color-underline-header);
+            margin-bottom: 5px;
+        }
+    }
+}
