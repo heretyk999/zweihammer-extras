@@ -24,7 +24,7 @@ const ACTOR_PROFILE_TEMPLATE = `${TEMPLATE_DIR}/quick-profile-actor.hbs`;
 
 // [ "base", "ancestry", "armor", "condition", "disease", "disorder", "drawback", "injury", "profession",
 // "quality", "ritual", "skill", "spell", "taint", "talent", "trait", "trapping", "uniqueAdvance", "weapon" ]
-const TRAIT_TYPES = [ "drawback", "taint", "talent", "trait" ];
+const TRAIT_TYPES = [ "drawback", "taint", "trait", "disease", "disorder", "injury"];
 
 
 function _tr(stringId) {
@@ -99,6 +99,13 @@ export class QuickProfileTray {
         };
         const content = await renderTemplate(MAIN_PROFILE_TEMPLATE, data);
         container.html(content);
+    }
+
+    async refresh(actor) {
+        if (this.getActiveActors().includes(actor)) {
+            console.log('refreshing tray');
+            this.updateTray();
+        }
     }
 
     getActiveActors() {
@@ -181,10 +188,17 @@ class QuickProfile {
     _getActorSkills(actor) {
         const skills = actor.itemTypes.skill
             .map(skill => {
-                return {name: skill.name, bonus: skill.system.bonus};
+                return {
+                    name: skill.name,
+                    attrAbbrev: skill.system.associatedPrimaryAttribute[0],
+                    bonus: skill.system.bonus,
+                    flipToFail: skill.system.isFlipToFail,
+                    baseChance: skillBaseChance(actor, skill)
+                };
             })
             .toSorted((a, b) => a.name.localeCompare(b.name))
-            .filter(skill => skill.bonus > 0);
+            .filter(skill => skill.bonus > 0)
+            ;
         return skills;
     }
 
@@ -194,11 +208,12 @@ class QuickProfile {
             .map(weapon => ({
                 name: weapon.name,
                 skill: weapon.system.associatedSkill,
-                chance: '?',
+                chance: weaponBaseChance(actor, weapon),
+                flipToFail: actorSkillByName(actor, weapon.system.associatedSkill).system.isFlipToFail,
                 distance: weapon.system.distance,
                 load: weapon.system.load,
                 damageFormula: weapon.system.damage.formula,
-                damage: '?',
+                damage: weaponDamage(actor, weapon),
                 qualities: weapon.system.qualities.value
             }))
             .toSorted((a, b) => a.name.localeCompare(b.name));
@@ -206,15 +221,55 @@ class QuickProfile {
     }
 
     _getActorTraits(actor, types) {
-        return actor.items
-            .filter(t => types.includes(t.type))
-            .map(t => ({
+        const talents = actor.itemTypes.talent
+            .filter(t => actorHasTalent(actor, t));
+        const otherTraits = actor.items
+            .filter(t => types.includes(t.type));
+        const allTraits = [...talents, ...otherTraits];
+        return allTraits.map(t => ({
                 name: t.name,
                 effect: t.system.rules.effect['@en'],
             }))
             .toSorted((a, b) => a.name.localeCompare(b.name))
         ;
     }
+}
+
+function actorHasTalent(actor, talent) {
+    const professions = actor.itemTypes.profession;
+    const isManualSource = talent.flags.zweihander?.source?.label ? false : true;
+    const hasTalent = isManualSource || professions.some(
+        p => p.system.talents.some(
+            t => t.linkedId === talent._id && t.purchased
+        )
+    );
+    return hasTalent;
+}
+
+function actorSkillByName(actor, skillName) {
+    return actor.itemTypes.skill.find(s => s.name === skillName);
+}
+
+function skillBaseChance(actor, skill) {
+    const attr = skill.system.associatedPrimaryAttribute;
+    const attrValue = actor.system.stats.primaryAttributes[attr.toLowerCase()].value;
+    const rankBonus = skill.system.bonus;
+    const bonuses = rankBonus;
+    const baseChance = attrValue + Math.max(-30, Math.min(30, bonuses));
+    return baseChance;
+}
+
+function weaponBaseChance(actor, weapon) {
+    const skillName = weapon.system.associatedSkill;
+    const skill = actorSkillByName(actor, skillName);
+    return skillBaseChance(actor, skill);
+}
+
+function weaponDamage(actor, weapon) {
+    let formula = weapon.system.damage.formula; //.replace('\[#\]', '@fury');
+    let terms = Roll.parse(formula);
+    let simplified = Roll.getFormula(terms.slice(0, terms.length-3));
+    return simplified;
 }
 
 class QuickProfileTrayConfig {
@@ -247,7 +302,22 @@ async function onControlToken(token, controlled) {
     game.profileTray.updateTrayState();
 }
 
-Hooks.on("controlToken", onControlToken);
+async function onActorUpdate(actor) {
+    console.log('onActorUpdate', actor);
+    game.profileTray.refresh(actor);
+}
+
+async function onItemChange(item) {
+    console.log('onItemChange', item);
+    game.profileTray.refresh(item.actor);
+}
+
+Hooks.on('controlToken', onControlToken);
+Hooks.on('updateActor', onActorUpdate);
+Hooks.on('createItem', onItemChange);
+Hooks.on('updateItem', onItemChange);
+Hooks.on('deleteItem', onItemChange);
+// other hooks: updateCombat, createCombat, updateCombatant, deleteCombat
 
 const registerQuickProfileTraySettings = (ns, tray) => {
     console.log('zweihammer | register quick profile tray settings');

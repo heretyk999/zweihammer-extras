@@ -1,57 +1,57 @@
-<h1>{{actor.name}}</h1>
-<table class="profile-attributes">
-  <tr>
-    {{#each attributes.primary}}
-    <th>{{abbrev}}</th>
+<div class="profile-actor" data-actorId="{{actor.uuid}}">
+  <h1>{{actor.name}}</h1>
+  <table class="profile-attributes">
+    <tr>
+      {{#each attributes.primary}}
+      <th>{{abbrev}}</th>
+      {{/each}}
+    </tr>
+    <tr>
+      {{#each attributes.primary}}
+      <td>{{this.value}} [{{bonus}}]</td>
+      {{/each}}
+    </tr>
+    <tr>
+      {{#each attributes.secondary}}
+      <th>{{abbrev}}</th>
+      {{/each}}
+    </tr>
+    <tr>
+      {{#each attributes.secondary}}
+      <td>{{{this.value}}}</td>
+      {{/each}}
+    </tr>
+  </table>
+  <div class="profile-skills profile-section">
+    {{#each skills}}
+    <span class="profile-skill {{#if flipToFail}}flip-to-fail{{/if}}">{{name}} ({{attrAbbrev}}) +{{bonus}}</span>{{#unless @last}}, {{/unless}}
     {{/each}}
-  </tr>
-  <tr>
-    {{#each attributes.primary}}
-    <td>{{this.value}} [{{bonus}}]</td>
-    {{/each}}
-  </tr>
-  <tr>
-    {{#each attributes.secondary}}
-    <th>{{abbrev}}</th>
-    {{/each}}
-  </tr>
-  <tr>
-    {{#each attributes.secondary}}
-    <td>{{{this.value}}}</td>
-    {{/each}}
-  </tr>
-</table>
-<div class="profile-skills profile-section">
-  {{#each skills}}
-    {{#if bonus}}
-      <span>{{name}} +{{bonus}}</span>{{#unless @last}}, {{/unless}}
-    {{/if}}
-  {{/each}}
-</div>
-<div class="profile-attacks profile-section">
-  <h2>Attack profile</h2>
-  <ul>
-    {{#each attacks}}
-    <li>
-      <span class="profile-attack-name">{{name}}:</span> <span class="profile-attack-chance">{{chance}}&percnt;</span>
-      &#x2022; Distance ({{distance}})
-      {{#if load}}&#x2022; Load ({{load}} AP){{/if}}
-      &#x2022; Damage ({{damage}})
-      &#x2022; {{qualities}}
-    </li>
-    {{/each}}
-  </ul>
-</div>
-<div class="profile-traits profile-section">
-  <h2>Traits</h2>
-  <ul>
-    {{#each traits}}
+  </div>
+  <div class="profile-attacks profile-section">
+    <h2>Attack profile</h2>
+    <ul>
+      {{#each attacks}}
+      <li>
+        <span class="profile-attack-name">{{name}}:</span> <span class="profile-attack-chance {{#if flipToFail}}flip-to-fail{{/if}}">{{chance}}&percnt;</span>
+        &#x2022; Distance ({{distance}})
+        {{#if load}}&#x2022; Load ({{load}} AP){{/if}}
+        &#x2022; <span data-tooltip="{{damageFormula}}">Damage ({{damage}})</span>
+        &#x2022; {{qualities}}
+      </li>
+      {{/each}}
+    </ul>
+  </div>
+  <div class="profile-traits profile-section">
+    <h2>Traits</h2>
+    <ul>
+      {{#each traits}}
       <li>
         <details>
           <summary class="profile-trait-name">{{name}}</summary>
           {{{effect}}}
         </details>
       </li>
-    {{/each}}
-  </ul>
+      {{/each}}
+    </ul>
+  </div>
 </div>
