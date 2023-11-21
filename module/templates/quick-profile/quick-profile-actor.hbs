@@ -28,7 +28,7 @@
     {{/each}}
   </div>
   <div class="profile-attacks profile-section">
-    <h2>Attack profile</h2>
+    <h2>Attack profile ({{furyDice}} Fury)</h2>
     <ul>
       {{#each attacks}}
       <li>
@@ -36,7 +36,7 @@
         &#x2022; Distance ({{distance}})
         {{#if load}}&#x2022; Load ({{load}} AP){{/if}}
         &#x2022; <span data-tooltip="{{damageFormula}}">Damage ({{damage}})</span>
-        &#x2022; {{qualities}}
+        &#x2022; {{#each qualities}}<span data-tooltip="<b>{{name}}:</b> {{effect}}">{{name}}</span>{{#unless @last}}, {{/unless}} {{/each}}
       </li>
       {{/each}}
     </ul>

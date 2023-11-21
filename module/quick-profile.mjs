@@ -142,9 +142,10 @@ class QuickProfile {
         const data = {
             options,
             actor,
+            furyDice: actor.system.details.size ?? 1,
             attributes: this._getActorAttributes(actor),
             skills: this._getActorSkills(actor),
-            attacks: this._getActorAttacks(actor),
+            attacks: await this._getActorAttacks(actor),
             traits: this._getActorTraits(actor, TRAIT_TYPES),
         }
         return data;
@@ -202,7 +203,7 @@ class QuickProfile {
         return skills;
     }
 
-    _getActorAttacks(actor) {
+    async _getActorAttacks(actor) {
         const attacks = actor.itemTypes.weapon
             .filter(weapon => (actor.type != 'character') || (weapon.system.equipped))
             .map(weapon => ({
@@ -217,7 +218,20 @@ class QuickProfile {
                 qualities: weapon.system.qualities.value
             }))
             .toSorted((a, b) => a.name.localeCompare(b.name));
-        return attacks;
+        return await Promise.all(
+            attacks.map(async weapon => ({
+                ...weapon,
+                qualities: await this._getQualities(weapon.qualities)
+            }))
+        );
+        // return attacks;
+    }
+
+    async _getQualities(names) {
+        const qualities = await game.zweihander.ZweihanderItem.types.quality.constructor.getQualities(names);
+        // const effects = qualities.map(it => `<b>${it.name}</b><br/>${it.effect}`);
+        return qualities;
+        // return effects.join('<br/>');
     }
 
     _getActorTraits(actor, types) {
@@ -266,10 +280,16 @@ function weaponBaseChance(actor, weapon) {
 }
 
 function weaponDamage(actor, weapon) {
-    let formula = weapon.system.damage.formula; //.replace('\[#\]', '@fury');
-    let terms = Roll.parse(formula);
+    let formula = weapon.system.damage.formula.replace(/\[#\]/, '@fury').replace(/\[(..)\]/, '@$1');
+    const data = Object.entries(actor.system.stats.primaryAttributes)
+        .map(([attr, val]) => ([`${attr[0].toUpperCase()}B`, val.bonus]))
+    let terms = Roll.parse(formula, Object.fromEntries(data));
     let simplified = Roll.getFormula(terms.slice(0, terms.length-3));
-    return simplified;
+    if (simplified) {
+        return Roll.safeEval(simplified);
+    } else {
+        return "-";
+    }
 }
 
 class QuickProfileTrayConfig {
@@ -326,7 +346,7 @@ const registerQuickProfileTraySettings = (ns, tray) => {
         scope: 'client',
         config: true,
         // default: 'auto',
-        default: 'always',
+        default: 'toggle',
         choices: {
             auto: 'Automatic',
             toggle: 'Toggle',
