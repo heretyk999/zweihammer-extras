@@ -242,6 +242,7 @@ class QuickProfile {
         const allTraits = [...talents, ...otherTraits];
         return allTraits.map(t => ({
                 name: t.name,
+                type: t.type,
                 effect: t.system.rules.effect['@en'],
             }))
             .toSorted((a, b) => a.name.localeCompare(b.name))
