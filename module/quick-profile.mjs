@@ -24,7 +24,7 @@ const ACTOR_PROFILE_TEMPLATE = `${TEMPLATE_DIR}/quick-profile-actor.hbs`;
 
 // [ "base", "ancestry", "armor", "condition", "disease", "disorder", "drawback", "injury", "profession",
 // "quality", "ritual", "skill", "spell", "taint", "talent", "trait", "trapping", "uniqueAdvance", "weapon" ]
-const TRAIT_TYPES = [ "drawback", "taint", "trait", "disease", "disorder", "injury"];
+const TRAIT_TYPES = [ "talent", "drawback", "taint", "trait", "disease", "disorder", "injury"];
 
 
 function _tr(stringId) {
@@ -224,23 +224,18 @@ class QuickProfile {
                 qualities: await this._getQualities(weapon.qualities)
             }))
         );
-        // return attacks;
     }
 
     async _getQualities(names) {
         const qualities = await game.zweihander.ZweihanderItem.types.quality.constructor.getQualities(names);
-        // const effects = qualities.map(it => `<b>${it.name}</b><br/>${it.effect}`);
         return qualities;
-        // return effects.join('<br/>');
     }
 
     _getActorTraits(actor, types) {
-        const talents = actor.itemTypes.talent
-            .filter(t => actorHasTalent(actor, t));
-        const otherTraits = actor.items
-            .filter(t => types.includes(t.type));
-        const allTraits = [...talents, ...otherTraits];
-        return allTraits.map(t => ({
+        return actor.items
+            .filter(t => types.includes(t.type))
+            .filter(t => actorHasTalent(actor, t))
+            .map(t => ({
                 name: t.name,
                 type: t.type,
                 effect: t.system.rules.effect['@en'],
@@ -250,7 +245,10 @@ class QuickProfile {
     }
 }
 
-function actorHasTalent(actor, talent) {
+function actorHasTalent(actor, trait) {
+    if (trait.type != 'talent') return true;
+    
+    const talent = trait;
     const professions = actor.itemTypes.profession;
     const isManualSource = talent.flags.zweihander?.source?.label ? false : true;
     const hasTalent = isManualSource || professions.some(
