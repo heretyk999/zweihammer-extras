@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "description": "Extra functionality for Zweihander system",
   "scripts": {
-    "update-manifest": "node scripts/update-manifest.mjs module.json"
+    "release-manifest": "node scripts/update-manifest.mjs --release --in-place module.json"
   },
   "author": "",
   "license": "MIT",

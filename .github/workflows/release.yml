@@ -1,0 +1,42 @@
+name: Build module release
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Get Version
+        id: get-version
+        uses: battila7/get-version-action@v2.2.1
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: 19
+          cache: npm
+        
+      - run: npm ci
+      - run: npx gulp css
+      
+      - name: Create release manifest
+        run: npm run release-manifest -- --repo=${{github.repository}} --release-version=${{steps.get-version.outputs.version-without-v}} --release-tag=${{github.event.release.tag_name}}
+
+      - run: zip -r ./module.zip README LICENSE module.json zweihammer-extras.css lang/ module/
+
+      - name: Upload files to release
+        id: create-module-release
+        uses: ncipollo/release-action@v1
+        with:
+          allowUpdates: true
+          name: ${{github.event.release.name}}
+          draft: ${{github.event.release.draft}}
+          prerelease: ${{github.event.release.prerelease}}
+          token: ${{secrets.GITHUB_TOKEN}}
+          artifacts: './module.json,./module.zip'
+          tag: ${{github.event.release.tag_name}}
+          body: ${{github.event.release.body}}
