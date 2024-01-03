@@ -1,0 +1,9 @@
+.*
+!/.github/
+!.gitignore
+
+*~
+
+node_modules/
+jsconfig.json
+/*.css
